@@ -1,26 +1,85 @@
 import { StyleSheet, Text, View, SafeAreaView, Pressable } from "react-native";
-import React from "react";
+import React, { useEffect } from "react";
 import { LinearGradient } from "expo-linear-gradient";
-import { CLIENT_ID } from "@env";
+import * as AuthSession from "expo-auth-session";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useNavigation } from "@react-navigation/native";
 
+import { CLIENT_ID, REDIRECT_URL } from "@env";
 import { Entypo, MaterialIcons, AntDesign } from "@expo/vector-icons";
 
 const LoginScreen = () => {
-  async function handleAuth() {
-    const config = {
-      issuer: "https://accounts.spotify.com",
-      clientId: CLIENT_ID,
-      scopes: [
-        "user-read-email",
-        "user-library-read",
-        "user-top-read",
-        "user-read-recently-played",
-        "playlist-read-private",
-        "playlist-read-collaborative",
-        "playlist-modify-public",
-        "playlist-modify-private",
-      ],
+  const navigation = useNavigation();
+
+  useEffect(() => {
+    const checkTokenValidity = async () => {
+      const accessToken = await AsyncStorage.getItem("token");
+      const expirationDate = await AsyncStorage.getItem("expirationDate");
+      console.log("access token: ", accessToken);
+      console.log("expiration date: ", expirationDate);
+
+      if (accessToken && expirationDate) {
+        const currentTime = Date.now();
+        if (currentTime < parseInt(expirationDate)) {
+          // token is valid
+          navigation.replace("Main");
+        } else {
+          // token expired
+          AsyncStorage.removeItem("token");
+          AsyncStorage.removeItem("expirationDate");
+        }
+      }
     };
+    checkTokenValidity();
+  }, []);
+
+  // async function handleAuth() {
+  //   const config = {
+  //     issuer: "https://accounts.spotify.com",
+  //     clientId: CLIENT_ID,
+  //     scopes: [
+  //       "user-read-email",
+  //       "user-library-read",
+  //       "user-top-read",
+  //       "user-read-recently-played",
+  //       "playlist-read-private",
+  //       "playlist-read-collaborative",
+  //       "playlist-modify-public",
+  //       // "playlist-modify-private",
+  //     ],
+  //     redirectUrl: REDIRECT_URL
+  //   };
+
+  //   const result = await AppAuth.authAsync(config);
+  //   console.log(result);
+
+  //   if(result.accessToken){
+  //     const expirationDate = new Date(result.accessTokenExpirationDate).getTime();
+  //     AsyncStorage.setItem("token", result.accessToken);
+  //     AsyncStorage.setItem("expirationDate", expirationDate.toString());
+  //     navigation.navigate("Main")
+  //   }
+  // }
+
+  async function handleAuth() {
+    const discovery = await AuthSession.fetchDiscoveryAsync(
+      "https://accounts.spotify.com"
+    );
+
+    const authUrl = `${discovery.authorizationEndpoint}?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URL}&response_type=token&scope=user-read-email%20user-library-read%20user-top-read%20user-read-recently-played%20playlist-read-private%20playlist-read-collaborative%20playlist-modify-public`;
+
+    const result = await AuthSession.startAsync({ authUrl });
+
+    console.log(result);
+
+    if (result.type === "success" && result.params.access_token) {
+      const expirationDate = new Date(
+        Date.now() + result.params.expires_in * 1000
+      ).getTime();
+      AsyncStorage.setItem("token", result.params.access_token);
+      AsyncStorage.setItem("expirationDate", expirationDate.toString());
+      navigation.navigate("Main");
+    }
   }
 
   return (
