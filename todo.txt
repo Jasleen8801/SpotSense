@@ -1,6 +1,11 @@
 Doing - https://www.youtube.com/watch?v=mVd8XQ9Pl-0
-35.35
+1:09:36
 
 token ki expiry ka dekhna pdna hai fuckkkk
 
 BC DOCUMENTATION GALAT HAIIIII!!
+
+Kuch yaad rkhne ki cheezein (jugaad)-
+    Basically token 1 ghante baad expire hoga!!
+    Tab LoginScreen mein jaake AsyncStorage clear krna, aur HomeScreen pe Image waala bhi comment kr dena!!!
+    Usko save krke chalana, ek baar chal gya phir uncomment kr dena

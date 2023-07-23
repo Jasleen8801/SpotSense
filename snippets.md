@@ -28,36 +28,38 @@ const [request, response, promptAsync] = useAuthRequest(
 const handleAuth = async () => {
   if (promptAsync) {
     const result = await promptAsync();
-    console.log(result);
+    // console.log(result);
 
     if (result) {
-      console.log("checkkk");
+      // console.log("checkkk");
       const { code } = result.params;
 
-      try {
-        const authOptions = {
-          url: "https://accounts.spotify.com/api/token",
-          headers: {
-            Authorization:
-              "Basic " + base64.encode(CLIENT_ID + ":" + CLIENT_SECRET),
-            "Content-Type": "application/x-www-form-urlencoded",
-          },
-          form: {
-            grant_type: "client_credentials",
-          },
-          json: true,
-          data: `grant_type=authorization_code&code=${code}&redirect_uri=${REDIRECT_URL}`,
-        };
-        const res = await axios.post(authOptions);
-        console.log("chala ", res);
-      } catch (error) {
-        console.log(error);
-      }
+      // try {
+      //   const authOptions = {
+      //     url: "https://accounts.spotify.com/api/token",
+      //     headers: {
+      //       Authorization:
+      //         "Basic " + base64.encode(CLIENT_ID + ":" + CLIENT_SECRET),
+      //       "Content-Type": "application/x-www-form-urlencoded",
+      //     },
+      //     form: {
+      //       grant_type: "client_credentials",
+      //     },
+      //     json: true,
+      //     data: `grant_type=authorization_code&code=${code}&redirect_uri=${REDIRECT_URL}`,
+      //   };
+      //   const res = await axios.post(authOptions);
+      //   console.log("chala ", res);
+      // } catch (error) {
+      //   console.log(error);
+      // }
 
-      const expirationDate = Date.now() + parseInt(expires_in) * 1000;
+      // const expirationDate = Date.now() + parseInt(expires_in) * 1000;
+      const expirationDate = Date.now() + 3600;
 
       if (code && expirationDate) {
         AsyncStorage.setItem("token", code);
+        console.log("token set: ", code);
         AsyncStorage.setItem("expirationDate", expirationDate.toString());
         navigation.navigate("Main");
       } else {

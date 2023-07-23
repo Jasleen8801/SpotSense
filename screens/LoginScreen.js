@@ -22,6 +22,7 @@ const LoginScreen = () => {
   const navigation = useNavigation();
 
   useEffect(() => {
+    // AsyncStorage.clear();
     const checkTokenValidity = async () => {
       const accessToken = await AsyncStorage.getItem("token");
       const expirationDate = await AsyncStorage.getItem("expirationDate");
@@ -45,7 +46,7 @@ const LoginScreen = () => {
     checkTokenValidity();
   }, []);
 
-  const [request, response, promptAsync] = useAuthRequest(
+  const [request, response, promptAsync, refreshAsync] = useAuthRequest(
     {
       clientId: CLIENT_ID,
       scopes: [
@@ -68,47 +69,50 @@ const LoginScreen = () => {
   const handleAuth = async () => {
     if (promptAsync) {
       const result = await promptAsync();
-      // console.log(result);
-  
+    
       if (result) {
-        // console.log("checkkk");
         const { code } = result.params;
   
-        // try {
-        //   const authOptions = {
-        //     url: "https://accounts.spotify.com/api/token",
-        //     headers: {
-        //       Authorization:
-        //         "Basic " + base64.encode(CLIENT_ID + ":" + CLIENT_SECRET),
-        //       "Content-Type": "application/x-www-form-urlencoded",
-        //     },
-        //     form: {
-        //       grant_type: "client_credentials",
-        //     },
-        //     json: true,
-        //     data: `grant_type=authorization_code&code=${code}&redirect_uri=${REDIRECT_URL}`,
-        //   };
-        //   const res = await axios.post(authOptions);
-        //   console.log("chala ", res);
-        // } catch (error) {
-        //   console.log(error);
-        // }
+        const base64EncodedCredentials = base64.encode(`${CLIENT_ID}:${CLIENT_SECRET}`);
+        const tokenEndpoint = "https://accounts.spotify.com/api/token";
+        const body = `grant_type=authorization_code&code=${code}&redirect_uri=${REDIRECT_URL}`;
+        const headers = {
+          Authorization: `Basic ${base64EncodedCredentials}`,
+          "Content-Type": "application/x-www-form-urlencoded",
+        };
   
-        // const expirationDate = Date.now() + parseInt(expires_in) * 1000;
-        const expirationDate = Date.now() + 3600;
+        try {
+          const response = await fetch(tokenEndpoint, {
+            method: "POST",
+            headers: headers,
+            body: body,
+          });
   
-        if (code && expirationDate) {
-          AsyncStorage.setItem("token", code);
-          AsyncStorage.setItem("expirationDate", expirationDate.toString());
-          navigation.navigate("Main");
-        } else {
-          console.error("Invalid access token or expiration date.");
+          if (!response.ok) {
+            throw new Error("Failed to exchange authorization code for access token.");
+          }
+  
+          const data = await response.json();
+          const newAccessToken = data.access_token;
+          const newExpiresIn = data.expires_in;
+  
+          if (newAccessToken && newExpiresIn) {
+            const newExpirationDate = Date.now() + newExpiresIn * 1000;
+            AsyncStorage.setItem("token", newAccessToken);
+            AsyncStorage.setItem("expirationDate", newExpirationDate.toString());
+            navigation.navigate("Main");
+          } else {
+            console.error("Invalid access token or expiration date.");
+          }
+        } catch (error) {
+          console.error("Error exchanging authorization code for access token:", error);
         }
       } else {
         console.error("Authentication error:", result.error);
       }
     }
   };
+  
 
   return (
     <LinearGradient colors={["#040306", "#131624"]} style={{ flex: 1 }}>
