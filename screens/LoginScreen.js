@@ -1,12 +1,22 @@
 import { StyleSheet, Text, View, SafeAreaView, Pressable } from "react-native";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { LinearGradient } from "expo-linear-gradient";
-import * as AuthSession from "expo-auth-session";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation } from "@react-navigation/native";
+import * as WebBrowser from "expo-web-browser";
+import { useAuthRequest } from "expo-auth-session";
+import axios from "axios";
+import base64 from "base-64";
 
-import { CLIENT_ID, REDIRECT_URL } from "@env";
+import { CLIENT_ID, REDIRECT_URL, CLIENT_SECRET } from "@env";
 import { Entypo, MaterialIcons, AntDesign } from "@expo/vector-icons";
+
+WebBrowser.maybeCompleteAuthSession();
+
+const discovery = {
+  authorizationEndpoint: "https://accounts.spotify.com/authorize",
+  tokenEndpoint: "https://accounts.spotify.com/api/token",
+};
 
 const LoginScreen = () => {
   const navigation = useNavigation();
@@ -29,58 +39,76 @@ const LoginScreen = () => {
           AsyncStorage.removeItem("expirationDate");
         }
       }
+
+      // navigation.replace("Main");
     };
     checkTokenValidity();
   }, []);
 
-  // async function handleAuth() {
-  //   const config = {
-  //     issuer: "https://accounts.spotify.com",
-  //     clientId: CLIENT_ID,
-  //     scopes: [
-  //       "user-read-email",
-  //       "user-library-read",
-  //       "user-top-read",
-  //       "user-read-recently-played",
-  //       "playlist-read-private",
-  //       "playlist-read-collaborative",
-  //       "playlist-modify-public",
-  //       // "playlist-modify-private",
-  //     ],
-  //     redirectUrl: REDIRECT_URL
-  //   };
+  const [request, response, promptAsync] = useAuthRequest(
+    {
+      clientId: CLIENT_ID,
+      scopes: [
+        "user-read-email",
+        "user-library-read",
+        "user-top-read",
+        "user-read-recently-played",
+        "playlist-read-private",
+        "playlist-read-collaborative",
+        "playlist-modify-public",
+        // "playlist-modify-private",
+      ],
+      usePKCE: false,
+      redirectUri: REDIRECT_URL,
+      clientSecret: CLIENT_SECRET,
+    },
+    discovery
+  );
 
-  //   const result = await AppAuth.authAsync(config);
-  //   console.log(result);
-
-  //   if(result.accessToken){
-  //     const expirationDate = new Date(result.accessTokenExpirationDate).getTime();
-  //     AsyncStorage.setItem("token", result.accessToken);
-  //     AsyncStorage.setItem("expirationDate", expirationDate.toString());
-  //     navigation.navigate("Main")
-  //   }
-  // }
-
-  async function handleAuth() {
-    const discovery = await AuthSession.fetchDiscoveryAsync(
-      "https://accounts.spotify.com"
-    );
-
-    const authUrl = `${discovery.authorizationEndpoint}?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URL}&response_type=token&scope=user-read-email%20user-library-read%20user-top-read%20user-read-recently-played%20playlist-read-private%20playlist-read-collaborative%20playlist-modify-public`;
-
-    const result = await AuthSession.startAsync({ authUrl });
-
-    console.log(result);
-
-    if (result.type === "success" && result.params.access_token) {
-      const expirationDate = new Date(
-        Date.now() + result.params.expires_in * 1000
-      ).getTime();
-      AsyncStorage.setItem("token", result.params.access_token);
-      AsyncStorage.setItem("expirationDate", expirationDate.toString());
-      navigation.navigate("Main");
+  const handleAuth = async () => {
+    if (promptAsync) {
+      const result = await promptAsync();
+      // console.log(result);
+  
+      if (result) {
+        // console.log("checkkk");
+        const { code } = result.params;
+  
+        // try {
+        //   const authOptions = {
+        //     url: "https://accounts.spotify.com/api/token",
+        //     headers: {
+        //       Authorization:
+        //         "Basic " + base64.encode(CLIENT_ID + ":" + CLIENT_SECRET),
+        //       "Content-Type": "application/x-www-form-urlencoded",
+        //     },
+        //     form: {
+        //       grant_type: "client_credentials",
+        //     },
+        //     json: true,
+        //     data: `grant_type=authorization_code&code=${code}&redirect_uri=${REDIRECT_URL}`,
+        //   };
+        //   const res = await axios.post(authOptions);
+        //   console.log("chala ", res);
+        // } catch (error) {
+        //   console.log(error);
+        // }
+  
+        // const expirationDate = Date.now() + parseInt(expires_in) * 1000;
+        const expirationDate = Date.now() + 3600;
+  
+        if (code && expirationDate) {
+          AsyncStorage.setItem("token", code);
+          AsyncStorage.setItem("expirationDate", expirationDate.toString());
+          navigation.navigate("Main");
+        } else {
+          console.error("Invalid access token or expiration date.");
+        }
+      } else {
+        console.error("Authentication error:", result.error);
+      }
     }
-  }
+  };
 
   return (
     <LinearGradient colors={["#040306", "#131624"]} style={{ flex: 1 }}>
