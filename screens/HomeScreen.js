@@ -12,16 +12,19 @@ import React, { useEffect, useState } from "react";
 import { LinearGradient } from "expo-linear-gradient";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
+import { useNavigation } from "@react-navigation/native";
 
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { AntDesign } from "@expo/vector-icons";
 import ArtistCard from "../components/ArtistCard";
+import RecentlyPlayedCard from "../components/RecentlyPlayedCard";
 
 const HomeScreen = () => {
   const [userProfile, setUserProfile] = useState();
   const [recentlyPlayed, setRecentlyPlayed] = useState([]);
   const [topArtists, setTopArtists] = useState();
 
+  const navigation = useNavigation();
   useEffect(() => {
     getProfile();
     getRecentlyPlayedSongs();
@@ -123,7 +126,7 @@ const HomeScreen = () => {
       });
       // console.log(response);
       setTopArtists(response.data.items);
-      console.log(topArtists[0].images[0].url);
+      // console.log(topArtists[0]);
     } catch (error) {
       console.log(error);
     }
@@ -229,6 +232,7 @@ const HomeScreen = () => {
           >
             <LinearGradient colors={["#33006F", "#FFFFFF"]}>
               <Pressable
+                onPress={() => navigation.navigate("Liked")}
                 style={{
                   width: 55,
                   height: 55,
@@ -301,10 +305,33 @@ const HomeScreen = () => {
         </Text>
 
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-          {topArtists.map((item, index) => {
-            <ArtistCard item={item} key={index} />;
-          })}
+          {topArtists?.map((item, index) => (
+            <ArtistCard item={item} key={index} />
+          ))}
         </ScrollView>
+
+        <View style={{ height: 10 }} />
+
+        <Text
+          style={{
+            color: "white",
+            fontSize: 19,
+            fontWeight: "bold",
+            marginHorizontal: 10,
+            marginTop: 10,
+          }}
+        >
+          Recently Played
+        </Text>
+
+        <FlatList
+          data={recentlyPlayed}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          renderItem={({ item, index }) => (
+            <RecentlyPlayedCard item={item} key={index} />
+          )}
+        />
       </ScrollView>
     </LinearGradient>
   );

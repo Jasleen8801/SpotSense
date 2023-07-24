@@ -6,6 +6,7 @@ import HomeScreen from "./screens/HomeScreen";
 import ProfileScreen from "./screens/ProfileScreen";
 import LoginScreen from "./screens/LoginScreen";
 import Assistant from "./screens/Assistant";
+import LikedSongsScreen from "./screens/LikedSongsScreen";
 
 import { Entypo } from "@expo/vector-icons";
 import { AntDesign } from "@expo/vector-icons";
@@ -101,6 +102,11 @@ function Navigation() {
         <Stack.Screen
           name="Main"
           component={BottomTabs}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="Liked"
+          component={LikedSongsScreen}
           options={{ headerShown: false }}
         />
       </Stack.Navigator>
