@@ -6,16 +6,29 @@ import {
   Image,
   ScrollView,
   Pressable,
+  FlatList,
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import { LinearGradient } from "expo-linear-gradient";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import axios from "axios";
 
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { AntDesign } from "@expo/vector-icons";
+import ArtistCard from "../components/ArtistCard";
 
 const HomeScreen = () => {
   const [userProfile, setUserProfile] = useState();
+  const [recentlyPlayed, setRecentlyPlayed] = useState([]);
+  const [topArtists, setTopArtists] = useState();
+
+  useEffect(() => {
+    getProfile();
+    getRecentlyPlayedSongs();
+    getTopArtists();
+  }, []);
+  // console.log(userProfile);
+
   const greetingMessage = () => {
     const currentTime = new Date().getHours();
     if (currentTime < 12) {
@@ -43,10 +56,78 @@ const HomeScreen = () => {
       console.log(error);
     }
   };
-  useEffect(() => {
-    getProfile();
-  }, []);
-  console.log(userProfile);
+
+  const getRecentlyPlayedSongs = async () => {
+    const accessToken = await AsyncStorage.getItem("token");
+    try {
+      const response = await axios({
+        method: "GET",
+        url: "https://api.spotify.com/v1/me/player/recently-played?limit=4",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+      // console.log(response);
+      const tracks = response.data.items;
+      setRecentlyPlayed(tracks);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const renderTracks = ({ item }) => {
+    return (
+      <Pressable
+        style={{
+          flex: 1,
+          flexDirection: "row",
+          justifyContent: "space-between",
+          marginHorizontal: 10,
+          marginVertical: 8,
+          backgroundColor: "#282828",
+          borderRadius: 4,
+          elevation: 3,
+        }}
+      >
+        <Image
+          style={{
+            width: 55,
+            height: 55,
+          }}
+          source={{ uri: item.track.album.images[0].url }}
+        />
+        <View
+          style={{ flex: 1, marginHorizontal: 8, justifyContent: "center" }}
+        >
+          <Text
+            numberOfLines={2}
+            style={{ color: "white", fontSize: 13, fontWeight: "bold" }}
+          >
+            {item.track.name}
+          </Text>
+        </View>
+      </Pressable>
+    );
+  };
+
+  const getTopArtists = async () => {
+    const accessToken = await AsyncStorage.getItem("token");
+    try {
+      const type = "artists";
+      const response = await axios({
+        method: "GET",
+        url: `https://api.spotify.com/v1/me/top/${type}`,
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+      // console.log(response);
+      setTopArtists(response.data.items);
+      console.log(topArtists[0].images[0].url);
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   return (
     <LinearGradient colors={["#040306", "#131624"]} style={{ flex: 1 }}>
@@ -125,7 +206,13 @@ const HomeScreen = () => {
 
         <View style={{ height: 10 }} />
 
-        <View>
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
           <Pressable
             style={{
               marginBottom: 10,
@@ -162,7 +249,62 @@ const HomeScreen = () => {
               Liked Songs
             </Text>
           </Pressable>
+
+          <View
+            style={{
+              marginBottom: 10,
+              flexDirection: "row",
+              alignItems: "center",
+              gap: 10,
+              flex: 1,
+              marginHorizontal: 10,
+              marginVertical: 8,
+              backgroundColor: "#202020",
+              borderRadius: 4,
+              elevation: 3,
+            }}
+          >
+            <Image
+              style={{
+                width: 55,
+                height: 55,
+              }}
+              source={{ uri: "https://i.pravatar.cc/100" }}
+            />
+            <View style={styles.randomArtist}>
+              <Text
+                style={{ color: "white", fontSize: 13, fontWeight: "bold" }}
+              >
+                Hiphop Tamhiza
+              </Text>
+            </View>
+          </View>
         </View>
+
+        <FlatList
+          data={recentlyPlayed}
+          renderItem={renderTracks}
+          numColumns={2}
+          columnWrapperStyle={{ justifyContent: "space-between" }}
+        />
+
+        <Text
+          style={{
+            color: "white",
+            fontSize: 19,
+            fontWeight: "bold",
+            marginHorizontal: 10,
+            marginTop: 10,
+          }}
+        >
+          Your Top Artists
+        </Text>
+
+        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+          {topArtists.map((item, index) => {
+            <ArtistCard item={item} key={index} />;
+          })}
+        </ScrollView>
       </ScrollView>
     </LinearGradient>
   );
