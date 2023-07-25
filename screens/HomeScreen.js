@@ -290,6 +290,7 @@ const HomeScreen = () => {
           renderItem={renderTracks}
           numColumns={2}
           columnWrapperStyle={{ justifyContent: "space-between" }}
+          contentContainerStyle={{ flexGrow: 1 }}
         />
 
         <Text
@@ -331,6 +332,7 @@ const HomeScreen = () => {
           renderItem={({ item, index }) => (
             <RecentlyPlayedCard item={item} key={index} />
           )}
+          contentContainerStyle={{ flexGrow: 1 }}
         />
       </ScrollView>
     </LinearGradient>
