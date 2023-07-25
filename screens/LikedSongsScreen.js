@@ -14,6 +14,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Player } from "../PlayerContext";
 import { BottomModal, ModalContent } from "react-native-modals";
+import { Audio } from "expo-av";
 
 import { Ionicons } from "@expo/vector-icons";
 import { AntDesign } from "@expo/vector-icons";
@@ -30,6 +31,7 @@ const LikedSongsScreen = () => {
   const [savedTracks, setSavedTracks] = useState([]);
   const { currentTrack, setCurrentTrack } = useContext(Player);
   const [modalVisible, setModalVisible] = useState(false);
+  const [currentSound, setCurrentSound] = useState(null);
 
   useEffect(() => {
     getSavedTracks();
@@ -65,6 +67,28 @@ const LikedSongsScreen = () => {
 
   const play = async (nextTrack) => {
     console.log(nextTrack);
+    const preview_url = nextTrack?.track?.preview_url;
+    try {
+      await Audio.setAudioModeAsync({
+        playsInSilentModeIOS: true,
+        staysActiveInBackground: false,
+        shouldDuckAndroid: false,
+      });
+      const { sound, status } = await Audio.Sound.createAsync(
+        {
+          uri: preview_url,
+        },
+        {
+          shouldPlay: true,
+          isLooping: false,
+        }
+      );
+      console.log("sound", sound);
+      setCurrentSound(sound);
+      await sound.playAsync();
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   // console.log(currentTrack);

@@ -44,6 +44,7 @@ npm install
     - Add the following environment variables to the `.env` file:
         - `SPOTIFY_CLIENT_ID=<your-client-id>`
         - `SPOTIFY_REDIRECT_URI=<your-redirect-uri>`
+        - `SPOTIFY_CLIENT_SECRET=<your-client-secret>`
 
 
 ## Running the App
@@ -54,13 +55,21 @@ Start the Expo Development server:
 expo start
 ```
 
+In case of Windows Operating System, be sure to connect both your pc and mobile device on same internet connection.
+
+In case of Linux distributions, use the following command and configure your system accordingly-
+
+```bash
+expo start --tunnel
+```
+
 You can run the app on your physical device using the Expo Go app or use an emulator/simulator.
 
 ### Built With
 
 - React Native
 - Expo
-- react-native-voice //to be done
-- expo-av //to be done
-- expo-permissions //to be done
-- react-native-dotenv //to be done
+- expo-av 
+- expo-web-browser
+- expo-auth-session
+- react-native-dotenv
