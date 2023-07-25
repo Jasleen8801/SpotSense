@@ -7,7 +7,7 @@ import { Entypo } from "@expo/vector-icons";
 const SongItem = ({ item }) => {
   return (
     <Pressable
-      style={{ flexDirection: "row", alignItems: "center", padding: 10 }}
+      style={{ flexDirection: "row", alignItems: "center", padding: 15 }}
     >
       <Image
         style={{ width: 50, height: 50, marginRight: 10 }}

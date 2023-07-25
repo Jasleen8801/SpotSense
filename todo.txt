@@ -1,5 +1,5 @@
 Doing - https://www.youtube.com/watch?v=mVd8XQ9Pl-0
-2:15:49
+2:42:45
 
 token ki expiry ka dekhna pdna hai fuckkkk
 
@@ -9,3 +9,5 @@ Kuch yaad rkhne ki cheezein (jugaad)-
     Basically token 1 ghante baad expire hoga!!
     Tab LoginScreen mein jaake AsyncStorage clear krna!!!
     Usko save krke chalana, ek baar chal gya phir uncomment kr dena
+
+everything goes lallalalallaallal

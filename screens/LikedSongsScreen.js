@@ -6,24 +6,30 @@ import {
   TextInput,
   View,
   FlatList,
+  Image,
 } from "react-native";
 import React, { useContext, useEffect, useState } from "react";
 import { useNavigation } from "@react-navigation/native";
 import { LinearGradient } from "expo-linear-gradient";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Player } from "../PlayerContext";
+import { BottomModal, ModalContent } from "react-native-modals";
 
 import { Ionicons } from "@expo/vector-icons";
 import { AntDesign } from "@expo/vector-icons";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Entypo } from "@expo/vector-icons";
 import SongItem from "../components/SongItem";
-import { Player } from "../PlayerContext";
+import { MaterialIcons } from "@expo/vector-icons";
+import { FontAwesome } from "@expo/vector-icons";
+import { Feather } from "@expo/vector-icons";
 
 const LikedSongsScreen = () => {
   const navigation = useNavigation();
   const [input, setInput] = useState("");
   const [savedTracks, setSavedTracks] = useState([]);
   const { currentTrack, setCurrentTrack } = useContext(Player);
+  const [modalVisible, setModalVisible] = useState(false);
 
   useEffect(() => {
     getSavedTracks();
@@ -54,122 +60,292 @@ const LikedSongsScreen = () => {
     if (savedTracks.length > 0) {
       setCurrentTrack(savedTracks[0]);
     }
+    await play(savedTracks[0]);
   };
 
-  return (
-    <LinearGradient colors={["#030842", "#17202A"]} style={{ flex: 1 }}>
-      <ScrollView style={{ flex: 1, marginTop: 50 }}>
-        <Pressable
-          onPress={() => navigation.goBack()}
-          style={{ marginHorizontal: 20 }}
-        >
-          <Ionicons name="arrow-back" size={24} color="white" />
-        </Pressable>
+  const play = async (nextTrack) => {
+    console.log(nextTrack);
+  };
 
-        <Pressable
-          style={{
-            marginHorizontal: 10,
-            flexDirection: "row",
-            alignItems: "center",
-            justifyContent: "space-between",
-            marginTop: 9,
-          }}
-        >
+  // console.log(currentTrack);
+
+  return (
+    <>
+      <LinearGradient colors={["#030842", "#17202A"]} style={{ flex: 1 }}>
+        <ScrollView style={{ flex: 1, marginTop: 50 }}>
+          <Pressable
+            onPress={() => navigation.goBack()}
+            style={{ marginHorizontal: 20 }}
+          >
+            <Ionicons name="arrow-back" size={24} color="white" />
+          </Pressable>
+
+          <Pressable
+            style={{
+              marginHorizontal: 10,
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "space-between",
+              marginTop: 9,
+            }}
+          >
+            <Pressable
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                gap: 10,
+                backgroundColor: "#390256",
+                padding: 9,
+                flex: 1,
+                borderRadius: 3,
+                height: 38,
+              }}
+            >
+              <Ionicons name="search" size={24} color="white" />
+              <TextInput
+                numberOfLines={1}
+                value={input}
+                onChangeText={(text) => setInput(text)}
+                placeholder="In Liked Songs?"
+                placeholderTextColor={"white"}
+                style={{ fontWeight: "500" }}
+              />
+            </Pressable>
+            <Pressable
+              style={{
+                marginHorizontal: 10,
+                backgroundColor: "#390256",
+                padding: 10,
+                borderRadius: 3,
+                height: 38,
+              }}
+            >
+              <Text style={{ color: "white" }}>Sort</Text>
+            </Pressable>
+          </Pressable>
+
+          <View style={{ height: 50 }} />
+          <View style={{ marginHorizontal: 20 }}>
+            <Text style={{ fontSize: 18, fontWeight: "bold", color: "white" }}>
+              Liked Songs
+            </Text>
+            <Text style={{ color: "white", fontSize: 13, marginTop: 5 }}>
+              {savedTracks.length} Songs
+            </Text>
+          </View>
+
           <Pressable
             style={{
               flexDirection: "row",
               alignItems: "center",
-              gap: 10,
-              backgroundColor: "#390256",
-              padding: 9,
-              flex: 1,
-              borderRadius: 3,
-              height: 38,
+              justifyContent: "space-between",
+              marginHorizontal: 20,
             }}
           >
-            <Ionicons name="search" size={24} color="white" />
-            <TextInput
-              numberOfLines={1}
-              value={input}
-              onChangeText={(text) => setInput(text)}
-              placeholder="In Liked Songs?"
-              placeholderTextColor={"white"}
-              style={{ fontWeight: "500" }}
-            />
-          </Pressable>
-          <Pressable
-            style={{
-              marginHorizontal: 10,
-              backgroundColor: "#390256",
-              padding: 10,
-              borderRadius: 3,
-              height: 38,
-            }}
-          >
-            <Text style={{ color: "white" }}>Sort</Text>
-          </Pressable>
-        </Pressable>
-
-        <View style={{ height: 50 }} />
-        <View style={{ marginHorizontal: 20 }}>
-          <Text style={{ fontSize: 18, fontWeight: "bold", color: "white" }}>
-            Liked Songs
-          </Text>
-          <Text style={{ color: "white", fontSize: 13, marginTop: 5 }}>
-            {savedTracks.length} Songs
-          </Text>
-        </View>
-
-        <Pressable
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-            justifyContent: "space-between",
-            marginHorizontal: 20,
-          }}
-        >
-          <Pressable
-            style={{
-              width: 30,
-              height: 30,
-              borderRadius: 15,
-              backgroundColor: "#1DB954",
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-          >
-            <AntDesign name="arrowdown" size={20} color="white" />
-          </Pressable>
-
-          <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
-            <MaterialCommunityIcons
-              name="cross-bolnisi"
-              size={24}
-              color="#1DB954"
-            />
             <Pressable
-              onPress={playTrack}
               style={{
-                width: 60,
-                height: 60,
-                borderRadius: 30,
+                width: 30,
+                height: 30,
+                borderRadius: 15,
+                backgroundColor: "#1DB954",
                 justifyContent: "center",
                 alignItems: "center",
-                backgroundColor: "#1DB954",
               }}
             >
-              <Entypo name="controller-play" size={24} color="white" />
+              <AntDesign name="arrowdown" size={20} color="white" />
+            </Pressable>
+
+            <View
+              style={{ flexDirection: "row", alignItems: "center", gap: 10 }}
+            >
+              <MaterialCommunityIcons
+                name="cross-bolnisi"
+                size={24}
+                color="#1DB954"
+              />
+              <Pressable
+                onPress={playTrack}
+                style={{
+                  width: 60,
+                  height: 60,
+                  borderRadius: 30,
+                  justifyContent: "center",
+                  alignItems: "center",
+                  backgroundColor: "#1DB954",
+                }}
+              >
+                <Entypo name="controller-play" size={24} color="white" />
+              </Pressable>
+            </View>
+          </Pressable>
+
+          <FlatList
+            showsVerticalScrollIndicator={false}
+            data={savedTracks}
+            renderItem={({ item }) => <SongItem item={item} />}
+          />
+        </ScrollView>
+      </LinearGradient>
+
+      {currentTrack && (
+        <Pressable
+          onPress={() => setModalVisible(!modalVisible)}
+          style={{
+            backgroundColor: "#390256",
+            width: "90%",
+            padding: 10,
+            marginLeft: "auto",
+            marginRight: "auto",
+            marginBottom: 15,
+            position: "absolute",
+            borderRadius: 6,
+            left: 20,
+            bottom: 10,
+            justifyContent: "space-between",
+            flexDirection: "row",
+            alignItems: "center",
+            gap: 10,
+          }}
+        >
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+            <Image
+              style={{ width: 40, height: 40 }}
+              source={{ uri: currentTrack?.track?.album?.images[0].url }}
+            />
+            <Text
+              numberOfLines={1}
+              style={{
+                fontSize: 13,
+                width: 220,
+                color: "white",
+                fontWeight: "bold",
+              }}
+            >
+              {currentTrack?.track?.name} •{" "}
+              {currentTrack?.track?.artists[0].name}
+            </Text>
+          </View>
+
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+            {/* <MaterialIcons name="devices-other" size={24} color="white" /> */}
+            <AntDesign name="heart" size={24} color="#1DB954" />
+            <Pressable>
+              <AntDesign name="pause" size={24} color="white" />
             </Pressable>
           </View>
         </Pressable>
+      )}
 
-        <FlatList
-          showsVerticalScrollIndicator={false}
-          data={savedTracks}
-          renderItem={({ item }) => <SongItem item={item} />}
-        />
-      </ScrollView>
-    </LinearGradient>
+      <BottomModal
+        visible={modalVisible}
+        onHardwareBackPress={() => setModalVisible(false)}
+        swipeDirection={["up", "down"]}
+        swipeThreshold={200}
+      >
+        <ModalContent
+          style={{ height: "100%", width: "100%", backgroundColor: "#390256" }}
+        >
+          <View style={{ height: "100%", width: "100%", marginTop: 40 }}>
+            <Pressable
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "space-between",
+              }}
+            >
+              <AntDesign
+                name="down"
+                size={24}
+                color="white"
+                onPress={() => setModalVisible(!modalVisible)}
+              />
+              <Text
+                style={{ fontSize: 14, fontWeight: "bold", color: "white" }}
+              >
+                {currentTrack?.track?.name}
+              </Text>
+              <Entypo name="dots-three-vertical" size={24} color="white" />
+            </Pressable>
+
+            <View style={{ height: 80 }} />
+
+            <View style={{ padding: 10 }}>
+              <Image
+                style={{ width: "100%", height: 330, borderRadius: 4 }}
+                source={{ uri: currentTrack?.track?.album?.images[0].url }}
+              />
+              <View
+                style={{
+                  marginTop: 20,
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                }}
+              >
+                <View>
+                  <Text
+                    style={{ fontSize: 18, fontWeight: "bold", color: "white" }}
+                  >
+                    {currentTrack?.track?.name}
+                  </Text>
+                  <Text style={{ color: "#D3D3D3", marginTop: 4 }}>
+                    {currentTrack?.track?.artists[0].name}
+                  </Text>
+                </View>
+                <AntDesign name="heart" size={24} color="#1DB954" />
+              </View>
+
+              <View style={{ marginTop: 10 }}>
+                <Text>Progress Bar</Text>
+                <View
+                  style={{
+                    marginTop: 12,
+                    flexDirection: "row",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                  }}
+                >
+                  <Text
+                    style={{ color: "white", fontSize: 15, color: "#D3D3D3" }}
+                  >
+                    0:00
+                  </Text>
+                  <Text
+                    style={{ color: "white", fontSize: 15, color: "#D3D3D3" }}
+                  >
+                    0:30
+                  </Text>
+                </View>
+              </View>
+
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  marginTop: 17,
+                }}
+              >
+                <Pressable>
+                  <FontAwesome name="arrows" size={30} color="#03C03C" />
+                </Pressable>
+                <Pressable>
+                  <Ionicons name="play-skip-back" size={30} color="white" />
+                </Pressable>
+                <Pressable>
+                  <AntDesign name="pausecircle" size={60} color="white" />
+                </Pressable>
+                <Pressable>
+                  <Ionicons name="play-skip-forward" size={30} color="white" />
+                </Pressable>
+                <Pressable>
+                  <Feather name="repeat" size={30} color="#03C03C" />
+                </Pressable>
+              </View>
+            </View>
+          </View>
+        </ModalContent>
+      </BottomModal>
+    </>
   );
 };
 
