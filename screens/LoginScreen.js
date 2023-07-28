@@ -22,7 +22,7 @@ const LoginScreen = () => {
   const navigation = useNavigation();
 
   useEffect(() => {
-    // AsyncStorage.clear();
+    // AsyncStorage.clear(); 
     const checkTokenValidity = async () => {
       const accessToken = await AsyncStorage.getItem("token");
       const expirationDate = await AsyncStorage.getItem("expirationDate");

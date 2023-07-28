@@ -8,7 +8,7 @@ import {
   FlatList,
   Image,
 } from "react-native";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import { useNavigation } from "@react-navigation/native";
 import { LinearGradient } from "expo-linear-gradient";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -27,6 +27,7 @@ import { Feather } from "@expo/vector-icons";
 
 const LikedSongsScreen = () => {
   const navigation = useNavigation();
+  const value = useRef(0);
   const [input, setInput] = useState("");
   const [savedTracks, setSavedTracks] = useState([]);
   const { currentTrack, setCurrentTrack } = useContext(Player);
@@ -73,6 +74,9 @@ const LikedSongsScreen = () => {
     // console.log(nextTrack);
     const preview_url = nextTrack?.track?.preview_url;
     try {
+      if(currentSound) {
+        await currentSound.stopAsync();
+      }
       await Audio.setAudioModeAsync({
         playsInSilentModeIOS: true,
         staysActiveInBackground: false,
@@ -107,6 +111,10 @@ const LikedSongsScreen = () => {
       setCurrentTime(status.positionMillis);
       setTotalDuration(status.durationMillis);
     }
+    if (status.didJustFinish === true) {
+      setCurrentSound(null);
+      playNextTrack();
+    }
   };
 
   const formatTime = (time) => {
@@ -123,6 +131,38 @@ const LikedSongsScreen = () => {
         await currentSound.playAsync();
       }
       setIsPlaying(!isPlaying);
+    }
+  };
+
+  const playNextTrack = async () => {
+    if (currentSound) {
+      await currentSound.stopAsync();
+      setCurrentSound(null);
+    }
+    value.current += 1;
+    if (value.current < savedTracks.length) {
+      const nextTrack = savedTracks[value.current];
+      setCurrentTrack(nextTrack);
+      // extractColors();
+      await play(nextTrack);
+    } else {
+      console.log("end of playlist");
+    }
+  };
+
+  const playPreviousTrack = async () => {
+    if (currentSound) {
+      await currentSound.stopAsync();
+      setCurrentSound(null);
+    }
+    value.current -= 1;
+    if (value.current < savedTracks.length) {
+      const nextTrack = savedTracks[value.current];
+      setCurrentTrack(nextTrack);
+
+      await play(nextTrack);
+    } else {
+      console.log("end of playlist");
     }
   };
 
@@ -239,7 +279,13 @@ const LikedSongsScreen = () => {
           <FlatList
             showsVerticalScrollIndicator={false}
             data={savedTracks}
-            renderItem={({ item }) => <SongItem item={item} />}
+            renderItem={({ item }) => (
+              <SongItem
+                item={item}
+                onPress={play}
+                isPlaying={item === currentTrack}
+              />
+            )}
           />
         </ScrollView>
       </LinearGradient>
@@ -417,7 +463,7 @@ const LikedSongsScreen = () => {
                 <Pressable>
                   <FontAwesome name="arrows" size={30} color="#03C03C" />
                 </Pressable>
-                <Pressable>
+                <Pressable onPress={playPreviousTrack}>
                   <Ionicons name="play-skip-back" size={30} color="white" />
                 </Pressable>
                 <Pressable onPress={handlePlayPause}>
@@ -439,7 +485,7 @@ const LikedSongsScreen = () => {
                     </Pressable>
                   )}
                 </Pressable>
-                <Pressable>
+                <Pressable onPress={playNextTrack}>
                   <Ionicons name="play-skip-forward" size={30} color="white" />
                 </Pressable>
                 <Pressable>

@@ -1,12 +1,20 @@
 import { Pressable, StyleSheet, Text, View, Image } from "react-native";
-import React from "react";
+import React, { useContext } from "react";
 
 import { AntDesign } from "@expo/vector-icons";
 import { Entypo } from "@expo/vector-icons";
+import { Player } from "../PlayerContext";
 
-const SongItem = ({ item }) => {
+const SongItem = ({ item, onPress, isPlaying }) => {
+  const { currentTrack, setCurrentTrack } = useContext(Player);
+
+  const handlePress = () => {
+    setCurrentTrack(item);
+    onPress(item);
+  }
   return (
     <Pressable
+      onPress={handlePress}
       style={{ flexDirection: "row", alignItems: "center", padding: 15 }}
     >
       <Image
@@ -17,7 +25,11 @@ const SongItem = ({ item }) => {
       <View style={{ flex: 1 }}>
         <Text
           numberOfLines={1}
-          style={{ fontWeight: "bold", fontSize: 16, color: "white" }}
+          style={
+            isPlaying
+              ? { fontWeight: "bold", fontSize: 16, color: "#3FFF00" }
+              : { fontWeight: "bold", fontSize: 16, color: "white" }
+          }
         >
           {item?.track?.name}
         </Text>
