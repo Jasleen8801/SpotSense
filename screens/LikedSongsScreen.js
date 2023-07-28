@@ -7,6 +7,7 @@ import {
   View,
   FlatList,
   Image,
+  ActivityIndicator,
 } from "react-native";
 import React, { useContext, useEffect, useRef, useState } from "react";
 import { useNavigation } from "@react-navigation/native";
@@ -15,6 +16,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Player } from "../PlayerContext";
 import { BottomModal, ModalContent } from "react-native-modals";
 import { Audio } from "expo-av";
+import { debounce } from "lodash";
 
 import { Ionicons } from "@expo/vector-icons";
 import { AntDesign } from "@expo/vector-icons";
@@ -37,6 +39,7 @@ const LikedSongsScreen = () => {
   const [currentTime, setCurrentTime] = useState(0);
   const [totalDuration, setTotalDuration] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [searchedTracks, setSearchedTracks] = useState([]);
 
   useEffect(() => {
     getSavedTracks();
@@ -74,7 +77,7 @@ const LikedSongsScreen = () => {
     // console.log(nextTrack);
     const preview_url = nextTrack?.track?.preview_url;
     try {
-      if(currentSound) {
+      if (currentSound) {
         await currentSound.stopAsync();
       }
       await Audio.setAudioModeAsync({
@@ -166,6 +169,25 @@ const LikedSongsScreen = () => {
     }
   };
 
+  const debouncedSearch = debounce(handleSearch, 800);
+  function handleSearch(text) {
+    const filteredTracks = savedTracks.filter((item) =>
+      item.track.name.toLowerCase().includes(text.toLowerCase())
+    );
+    setSearchedTracks(filteredTracks);
+  }
+
+  const handleInputChange = (text) => {
+    setInput(text);
+    debouncedSearch(text);
+  };
+
+  useEffect(() => {
+    if (savedTracks.length > 0) {
+      handleSearch(input);
+    }
+  }, [savedTracks]);
+
   return (
     <>
       <LinearGradient colors={["#030842", "#17202A"]} style={{ flex: 1 }}>
@@ -202,10 +224,10 @@ const LikedSongsScreen = () => {
               <TextInput
                 numberOfLines={1}
                 value={input}
-                onChangeText={(text) => setInput(text)}
+                onChangeText={(text) => handleInputChange(text)}
                 placeholder="In Liked Songs?"
                 placeholderTextColor={"white"}
-                style={{ fontWeight: "500" }}
+                style={{ fontWeight: "500", color: "white" }}
               />
             </Pressable>
             <Pressable
@@ -276,17 +298,21 @@ const LikedSongsScreen = () => {
             </View>
           </Pressable>
 
-          <FlatList
-            showsVerticalScrollIndicator={false}
-            data={savedTracks}
-            renderItem={({ item }) => (
-              <SongItem
-                item={item}
-                onPress={play}
-                isPlaying={item === currentTrack}
-              />
-            )}
-          />
+          {searchedTracks.length === 0 ? (
+            <ActivityIndicator size="large" color="gray" /> // Show a loading indicator while data is being fetched
+          ) : (
+            <FlatList
+              showsVerticalScrollIndicator={false}
+              data={searchedTracks}
+              renderItem={({ item }) => (
+                <SongItem
+                  item={item}
+                  onPress={play}
+                  isPlaying={item === currentTrack}
+                />
+              )}
+            />
+          )}
         </ScrollView>
       </LinearGradient>
 

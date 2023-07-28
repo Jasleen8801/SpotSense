@@ -14,8 +14,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { useNavigation } from "@react-navigation/native";
 
-import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { AntDesign } from "@expo/vector-icons";
+import { MaterialCommunityIcons, AntDesign } from "@expo/vector-icons";
 import ArtistCard from "../components/ArtistCard";
 import RecentlyPlayedCard from "../components/RecentlyPlayedCard";
 
@@ -46,7 +45,7 @@ const HomeScreen = () => {
 
   const getProfile = async () => {
     const accessToken = await AsyncStorage.getItem("token");
-    console.log(accessToken);
+    // console.log(accessToken);
     try {
       const response = await fetch("https://api.spotify.com/v1/me", {
         headers: {
