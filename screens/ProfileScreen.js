@@ -9,9 +9,7 @@ const ProfileScreen = () => {
   const [playlists, setPlaylists] = useState([]);
 
   const getProfile = async () => {
-    console.log("hi");
     const accessToken = await AsyncStorage.getItem("token");
-    console.log("accesssssed token", accessToken);
     try {
       const response = await fetch("https://api.spotify.com/v1/me", {
         headers: {
