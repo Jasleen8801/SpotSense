@@ -1,10 +1,13 @@
-import { ScrollView, StyleSheet, Text, View, Image } from "react-native";
+import { ScrollView, StyleSheet, Text, View, Image, TouchableOpacity } from "react-native";
 import React, { useState, useEffect } from "react";
 import { LinearGradient } from "expo-linear-gradient";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import Voice from "react";
 
 const Assistant = () => {
   const [userProfile, setUserProfile] = useState(null);
+  const [isListening, setIsListening] = useState(false);
+  const [recognizedText, setRecognizedText] = useState("");
 
   const getProfile = async () => {
     const accessToken = await AsyncStorage.getItem("token");
@@ -22,10 +25,44 @@ const Assistant = () => {
     }
   };
 
+  const startRecognition = async () => {
+    try {
+      await Voice.start("en-US");
+      setIsListening(true);
+      setRecognizedText("");
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const stopRecognition = async () => {
+    try {
+      await Voice.stop();
+      setIsListening(false);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const onSpeechResults = (event) => {
+    const recognized = event.value[0];
+    setRecognizedText(recognized);
+    handleVoiceCommand(recognized);
+  };
+
+  const handleVoiceCommand = (command) => {
+    console.log(command);
+  };
+
   useEffect(() => {
     getProfile();
+
+    Voice.onSpeechResults = onSpeechResults;
+    return () => {
+      Voice.destroy().then(Voice.removeAllListeners);
+    };
   }, []);
-  
+
   return (
     <LinearGradient colors={["#040306", "#131624"]} style={{ flex: 1 }}>
       <ScrollView style={{ marginTop: 50 }}>
@@ -53,7 +90,14 @@ const Assistant = () => {
           </View>
         </View>
 
-
+        <TouchableOpacity
+          style={styles.voiceButton}
+          onPress={() => (isListening ? stopRecognition() : startRecognition())}
+        >
+          <Text style={{ color: "white", fontSize: 16 }}>
+            {isListening ? "Listening..." : "Start Listening"}
+          </Text>
+        </TouchableOpacity>
       </ScrollView>
     </LinearGradient>
   );
