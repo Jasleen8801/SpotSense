@@ -1,13 +1,21 @@
-import { ScrollView, StyleSheet, Text, View, Image, TouchableOpacity } from "react-native";
+import {
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+  Image,
+  TouchableOpacity,
+} from "react-native";
 import React, { useState, useEffect } from "react";
 import { LinearGradient } from "expo-linear-gradient";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import Voice from "react";
+import Voice from "@react-native-voice/voice";
 
 const Assistant = () => {
   const [userProfile, setUserProfile] = useState(null);
-  const [isListening, setIsListening] = useState(false);
   const [recognizedText, setRecognizedText] = useState("");
+  const [isListening, setIsListening] = useState(false);
+  const [error, setError] = useState("");
 
   const getProfile = async () => {
     const accessToken = await AsyncStorage.getItem("token");
@@ -19,45 +27,36 @@ const Assistant = () => {
       });
       const data = await response.json();
       setUserProfile(data);
-      return data;
     } catch (error) {
       console.log(error);
     }
   };
 
-  const startRecognition = async () => {
+  Voice.onSpeechStart = () => setIsListening(true);
+  Voice.onSpeechEnd = () => setIsListening(false);
+  Voice.onSpeechError = (err) => setError(err.error);
+  Voice.onSpeechResults = (res) => setRecognizedText(res.value[0]);
+
+  const startRecording = async () => {
     try {
+      console.log("starting ");
       await Voice.start("en-US");
-      setIsListening(true);
-      setRecognizedText("");
     } catch (error) {
       console.log(error);
     }
   };
 
-  const stopRecognition = async () => {
+  const endRecording = async () => {
     try {
+      console.log("ending:");
       await Voice.stop();
-      setIsListening(false);
     } catch (error) {
       console.log(error);
     }
-  };
-
-  const onSpeechResults = (event) => {
-    const recognized = event.value[0];
-    setRecognizedText(recognized);
-    handleVoiceCommand(recognized);
-  };
-
-  const handleVoiceCommand = (command) => {
-    console.log(command);
   };
 
   useEffect(() => {
     getProfile();
-
-    Voice.onSpeechResults = onSpeechResults;
     return () => {
       Voice.destroy().then(Voice.removeAllListeners);
     };
@@ -92,12 +91,24 @@ const Assistant = () => {
 
         <TouchableOpacity
           style={styles.voiceButton}
-          onPress={() => (isListening ? stopRecognition() : startRecognition())}
+          onPress={isListening ? endRecording : startRecording}
         >
           <Text style={{ color: "white", fontSize: 16 }}>
             {isListening ? "Listening..." : "Start Listening"}
           </Text>
         </TouchableOpacity>
+
+        {error && (
+          <View style={{ backgroundColor: "red", padding: 5, margin: 20 }}>
+            <Text style={{ color: "white", fontSize: 16, textAlign: "center" }}>
+              {error}
+            </Text>
+          </View>
+        )}
+
+        <View style={styles.recognizedTextContainer}>
+          <Text style={styles.recognizedText}>{recognizedText}</Text>
+        </View>
       </ScrollView>
     </LinearGradient>
   );
@@ -105,4 +116,22 @@ const Assistant = () => {
 
 export default Assistant;
 
-const styles = StyleSheet.create({});
+const styles = StyleSheet.create({
+  voiceButton: {
+    backgroundColor: "#1DB954",
+    padding: 10,
+    borderRadius: 25,
+    alignSelf: "center",
+    marginTop: 20,
+  },
+  recognizedTextContainer: {
+    backgroundColor: "#202020",
+    padding: 12,
+    margin: 20,
+    borderRadius: 8,
+  },
+  recognizedText: {
+    color: "white",
+    fontSize: 16,
+  },
+});

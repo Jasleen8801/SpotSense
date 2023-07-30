@@ -10,3 +10,4 @@ Kuch yaad rkhne ki cheezein (jugaad)-
 everything goes lallalalallaallal
 
 ab krna hai voice assistant waala kaam main
+jisme react-native ke module expo mein nhi chl rhe toh react-native-voice ki jagah expo-speech ka dekhna
