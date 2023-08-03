@@ -14,7 +14,11 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { useNavigation } from "@react-navigation/native";
 
-import { MaterialCommunityIcons, AntDesign } from "@expo/vector-icons";
+import {
+  MaterialCommunityIcons,
+  AntDesign,
+  Ionicons,
+} from "@expo/vector-icons";
 import ArtistCard from "../components/ArtistCard";
 import RecentlyPlayedCard from "../components/RecentlyPlayedCard";
 
@@ -168,11 +172,9 @@ const HomeScreen = () => {
               {message}
             </Text>
           </View>
-          <MaterialCommunityIcons
-            name="lightning-bolt-outline"
-            size={24}
-            color="white"
-          />
+          <Pressable onPress={() => navigation.navigate("ChatBot")}>
+            <Ionicons name="chatbubbles-outline" size={24} color="white" />
+          </Pressable>
         </View>
 
         <View

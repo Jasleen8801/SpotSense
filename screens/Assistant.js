@@ -94,7 +94,8 @@ const Assistant = () => {
           onPress={isListening ? endRecording : startRecording}
         >
           <Text style={{ color: "white", fontSize: 16 }}>
-            {isListening ? "Listening..." : "Start Listening"}
+            {/* {isListening ? "Listening..." : "Start Listening"} */}
+            Coming Soon
           </Text>
         </TouchableOpacity>
 

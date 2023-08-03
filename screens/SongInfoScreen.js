@@ -71,7 +71,6 @@ const SongInfoScreen = () => {
             />
           </View>
         </View>
-
         <Text
           style={{
             color: "white",
