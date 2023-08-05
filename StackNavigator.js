@@ -14,6 +14,7 @@ import { Entypo } from "@expo/vector-icons";
 import { AntDesign } from "@expo/vector-icons";
 import { Ionicons } from "@expo/vector-icons";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import ArtistScreen from "./screens/ArtistScreen";
 
 const Tab = createBottomTabNavigator();
 
@@ -119,6 +120,11 @@ function Navigation() {
         <Stack.Screen
           name="ChatBot"
           component={ChatbotScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="Artist"
+          component={ArtistScreen}
           options={{ headerShown: false }}
         />
       </Stack.Navigator>

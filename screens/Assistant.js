@@ -9,14 +9,9 @@ import {
 import React, { useState, useEffect } from "react";
 import { LinearGradient } from "expo-linear-gradient";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import Voice from "@react-native-voice/voice";
 
 const Assistant = () => {
   const [userProfile, setUserProfile] = useState(null);
-  const [recognizedText, setRecognizedText] = useState("");
-  const [isListening, setIsListening] = useState(false);
-  const [error, setError] = useState("");
-
   const getProfile = async () => {
     const accessToken = await AsyncStorage.getItem("token");
     try {
@@ -32,34 +27,8 @@ const Assistant = () => {
     }
   };
 
-  Voice.onSpeechStart = () => setIsListening(true);
-  Voice.onSpeechEnd = () => setIsListening(false);
-  Voice.onSpeechError = (err) => setError(err.error);
-  Voice.onSpeechResults = (res) => setRecognizedText(res.value[0]);
-
-  const startRecording = async () => {
-    try {
-      console.log("starting ");
-      await Voice.start("en-US");
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  const endRecording = async () => {
-    try {
-      console.log("ending:");
-      await Voice.stop();
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
   useEffect(() => {
     getProfile();
-    return () => {
-      Voice.destroy().then(Voice.removeAllListeners);
-    };
   }, []);
 
   return (
@@ -91,25 +60,15 @@ const Assistant = () => {
 
         <TouchableOpacity
           style={styles.voiceButton}
-          onPress={isListening ? endRecording : startRecording}
         >
           <Text style={{ color: "white", fontSize: 16 }}>
-            {/* {isListening ? "Listening..." : "Start Listening"} */}
             Coming Soon
           </Text>
         </TouchableOpacity>
 
-        {error && (
-          <View style={{ backgroundColor: "red", padding: 5, margin: 20 }}>
-            <Text style={{ color: "white", fontSize: 16, textAlign: "center" }}>
-              {error}
-            </Text>
-          </View>
-        )}
-
         <View style={styles.recognizedTextContainer}>
           <Text style={styles.recognizedText}>{recognizedText}</Text>
-        </View>
+        </View> 
       </ScrollView>
     </LinearGradient>
   );

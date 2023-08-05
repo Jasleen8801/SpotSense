@@ -5,7 +5,6 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation } from "@react-navigation/native";
 import * as WebBrowser from "expo-web-browser";
 import { useAuthRequest } from "expo-auth-session";
-import axios from "axios";
 import base64 from "base-64";
 
 import { CLIENT_ID, REDIRECT_URL, CLIENT_SECRET } from "@env";
