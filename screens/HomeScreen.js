@@ -7,6 +7,7 @@ import {
   ScrollView,
   Pressable,
   FlatList,
+  Animated
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import { LinearGradient } from "expo-linear-gradient";
@@ -22,16 +23,70 @@ import {
 import ArtistCard from "../components/ArtistCard";
 import RecentlyPlayedCard from "../components/RecentlyPlayedCard";
 
+const CurrentlyPlaying = ({ song }) => {
+  const [fadeAnim] = useState(new Animated.Value(0));
+
+  useEffect(() => {
+    // Add animation effect when the song changes
+    Animated.timing(fadeAnim, {
+      toValue: 1,
+      duration: 1000,
+      useNativeDriver: true,
+    }).start();
+  }, [song]);
+
+  if (!song) {
+    return null; // If no song is playing, don't render anything
+  }
+
+  return (
+    <Animated.View style={{ opacity: fadeAnim }}>
+      <View
+        style={{
+          flexDirection: "row",
+          alignItems: "center",
+          padding: 10,
+          backgroundColor: "#282828",
+          borderRadius: 8,
+          margin: 10,
+        }}
+      >
+        <Image
+          source={{ uri: song.item.album.images[0].url }}
+          style={{ width: 50, height: 50, borderRadius: 8 }}
+        />
+        <View style={{ marginLeft: 10 }}>
+          <Text style={{ color: "white", fontWeight: "bold" }}>
+            {song.item.name}
+          </Text>
+          <Text style={{ color: "gray" }}>
+            {song.item.artists[0].name} - {song.item.album.name}
+          </Text>
+          {/* You can add progress bar or other song information here */}
+        </View>
+      </View>
+    </Animated.View>
+  );
+};
+
 const HomeScreen = () => {
   const [userProfile, setUserProfile] = useState();
   const [recentlyPlayed, setRecentlyPlayed] = useState([]);
   const [topArtists, setTopArtists] = useState();
+  const [currentSong, setCurrentSong] = useState();
 
   const navigation = useNavigation();
   useEffect(() => {
     getProfile();
     getRecentlyPlayedSongs();
     getTopArtists();
+    getCurrentSong();
+
+    // if (response.data.is_playing) {
+    //   setCurrentSong(response.data);
+    // } else {
+    //   setCurrentSong(null);
+    // }
   }, []);
   // console.log(userProfile);
 
@@ -130,6 +185,28 @@ const HomeScreen = () => {
       // console.log(response);
       setTopArtists(response.data.items);
       // console.log(topArtists[0]);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const getCurrentSong = async () => {
+    const accessToken = await AsyncStorage.getItem("token");
+    try {
+      const response = axios.get(
+        "https://api.spotify.com/v1/me/player/currently-playing",
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
+      console.log(response)
+      // if (response.data.is_playing) {
+      //   setCurrentSong(response.data);
+      // } else {
+      //   setCurrentSong(null);
+      // }
     } catch (error) {
       console.log(error);
     }
@@ -335,6 +412,8 @@ const HomeScreen = () => {
           )}
           contentContainerStyle={{ flexGrow: 1 }}
         />
+
+        <CurrentlyPlaying song={currentSong} />
       </ScrollView>
     </LinearGradient>
   );

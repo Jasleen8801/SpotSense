@@ -11,3 +11,6 @@ everything goes lallalalallaallal
 
 ab krna hai voice assistant waala kaam main
 jisme react-native ke module expo mein nhi chl rhe toh react-native-voice ki jagah expo-speech ka dekhna
+
+ab krna home screen aur voice assistant expo speech
+chatbot api after conversational systems main course work
