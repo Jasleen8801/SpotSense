@@ -21,7 +21,7 @@ const LoginScreen = () => {
   const navigation = useNavigation();
 
   useEffect(() => {
-    AsyncStorage.clear(); 
+    // AsyncStorage.clear(); 
     const checkTokenValidity = async () => {
       const accessToken = await AsyncStorage.getItem("token");
       const expirationDate = await AsyncStorage.getItem("expirationDate");
@@ -56,6 +56,8 @@ const LoginScreen = () => {
         "playlist-read-private",
         "playlist-read-collaborative",
         "playlist-modify-public",
+        "user-read-currently-playing",
+        "user-modify-playback-state"
         // "playlist-modify-private",
       ],
       usePKCE: false,

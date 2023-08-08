@@ -14,3 +14,6 @@ jisme react-native ke module expo mein nhi chl rhe toh react-native-voice ki jag
 
 ab krna home screen aur voice assistant expo speech
 chatbot api after conversational systems main course work
+
+bs voice assistant main reh gya - https://fostermade.co/blog/making-speech-to-text-work-with-react-native-and-expo 
+ispe dekh lena chl jayega lol ... jk no 

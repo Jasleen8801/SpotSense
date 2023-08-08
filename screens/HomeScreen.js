@@ -7,7 +7,7 @@ import {
   ScrollView,
   Pressable,
   FlatList,
-  Animated
+  Animated,
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import { LinearGradient } from "expo-linear-gradient";
@@ -27,7 +27,6 @@ const CurrentlyPlaying = ({ song }) => {
   const [fadeAnim] = useState(new Animated.Value(0));
 
   useEffect(() => {
-    // Add animation effect when the song changes
     Animated.timing(fadeAnim, {
       toValue: 1,
       duration: 1000,
@@ -36,7 +35,7 @@ const CurrentlyPlaying = ({ song }) => {
   }, [song]);
 
   if (!song) {
-    return null; // If no song is playing, don't render anything
+    return null;
   }
 
   return (
@@ -62,7 +61,6 @@ const CurrentlyPlaying = ({ song }) => {
           <Text style={{ color: "gray" }}>
             {song.item.artists[0].name} - {song.item.album.name}
           </Text>
-          {/* You can add progress bar or other song information here */}
         </View>
       </View>
     </Animated.View>
@@ -81,12 +79,6 @@ const HomeScreen = () => {
     getRecentlyPlayedSongs();
     getTopArtists();
     getCurrentSong();
-
-    // if (response.data.is_playing) {
-    //   setCurrentSong(response.data);
-    // } else {
-    //   setCurrentSong(null);
-    // }
   }, []);
   // console.log(userProfile);
 
@@ -193,20 +185,21 @@ const HomeScreen = () => {
   const getCurrentSong = async () => {
     const accessToken = await AsyncStorage.getItem("token");
     try {
-      const response = axios.get(
-        "https://api.spotify.com/v1/me/player/currently-playing",
+      // console.log(accessToken);
+      const response = await axios.get(
+        "https://api.spotify.com/v1/me/player/currently-playing?market=ES",
         {
           headers: {
             Authorization: `Bearer ${accessToken}`,
           },
         }
       );
-      console.log(response)
-      // if (response.data.is_playing) {
-      //   setCurrentSong(response.data);
-      // } else {
-      //   setCurrentSong(null);
-      // }
+      // console.log(response);
+      if (response.data.is_playing) {
+        setCurrentSong(response.data);
+      } else {
+        setCurrentSong(null);
+      }
     } catch (error) {
       console.log(error);
     }
@@ -414,6 +407,8 @@ const HomeScreen = () => {
         />
 
         <CurrentlyPlaying song={currentSong} />
+
+        <View style={{ height: 50 }} />
       </ScrollView>
     </LinearGradient>
   );
