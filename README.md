@@ -46,6 +46,12 @@ npm install
         - `SPOTIFY_REDIRECT_URI=<your-redirect-uri>`
         - `SPOTIFY_CLIENT_SECRET=<your-client-secret>`
 
+5. Set up Google Cloud Speech API
+
+    - Create a Google Cloud Project and enable the Speech-to-Text API
+    - Generate API credentials and download the JSON key file
+    - Save the JSON key file as `google-cloud-credentials.json` in the root directory of the project
+
 
 ## Running the App
 
@@ -65,11 +71,4 @@ expo start --tunnel
 
 You can run the app on your physical device using the Expo Go app or use an emulator/simulator.
 
-### Built With
-
-- React Native
-- Expo
-- expo-av 
-- expo-web-browser
-- expo-auth-session
-- react-native-dotenv
+Please note that you need to replace `<your-client-id>`, `<your-redirect-uri>`, and `<your-client-secret>` with your actual Spotify credentials. Also, make sure you follow the Google Cloud Speech API setup instructions and place the `google-cloud-credentials.json` file in the project root directory.

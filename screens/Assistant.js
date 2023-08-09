@@ -11,6 +11,9 @@ import { LinearGradient } from "expo-linear-gradient";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Permissions from "expo-permissions";
 import { Audio } from "expo-av";
+import { SpeechClient } from "@google-cloud/speech";
+import path from "path";
+import { getTranscription } from "../utils/getTranscription";
 
 const recordingOptions = {
   android: {
@@ -37,6 +40,8 @@ const Assistant = () => {
   const [userProfile, setUserProfile] = useState(null);
   const [isRecording, setIsRecording] = useState(null);
   const [recording, setRecording] = useState(null);
+  const [audioUri, setAudioUri] = useState(null);
+  const [recognizedText, setRecognizedText] = useState("");
 
   const getProfile = async () => {
     const accessToken = await AsyncStorage.getItem("token");
@@ -76,6 +81,11 @@ const Assistant = () => {
       stopRecording();
     }
     setRecording(recording);
+    recording.setOnRecordingStatusUpdate((status) => {
+      if (!status.isRecording) {
+        setAudioUri(status.uri);
+      }
+    });
   };
 
   const stopRecording = async () => {
@@ -89,6 +99,10 @@ const Assistant = () => {
 
     setIsRecording(false);
     setRecording(null);
+    if (audioUri) {
+      const transcription = await getTranscription(audioUri);
+      setRecognizedText(transcription);
+    }
   };
 
   useEffect(() => {
@@ -122,8 +136,16 @@ const Assistant = () => {
           </View>
         </View>
 
-        <TouchableOpacity style={styles.voiceButton}>
-          <Text style={{ color: "white", fontSize: 16 }}>Coming Soon</Text>
+        <TouchableOpacity style={styles.voiceButton} onPress={startRecording}>
+          <Text style={{ color: "white", fontSize: 16 }}>Start Recording</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.voiceButton}
+          onPress={stopRecording}
+          disabled={!isRecording}
+        >
+          <Text style={{ color: "white", fontSize: 16 }}>Stop Recording</Text>
         </TouchableOpacity>
 
         <View style={styles.recognizedTextContainer}>
