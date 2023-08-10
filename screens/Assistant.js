@@ -11,37 +11,13 @@ import { LinearGradient } from "expo-linear-gradient";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Permissions from "expo-permissions";
 import { Audio } from "expo-av";
-import { SpeechClient } from "@google-cloud/speech";
-import path from "path";
-import { getTranscription } from "../utils/getTranscription";
-
-const recordingOptions = {
-  android: {
-    extension: ".m4a",
-    outputFormat: Audio.RECORDING_OPTION_ANDROID_OUTPUT_FORMAT_MPEG_4,
-    audioEncoder: Audio.RECORDING_OPTION_ANDROID_AUDIO_ENCODER_AAC,
-    sampleRate: 44100,
-    numberOfChannels: 2,
-    bitRate: 128000,
-  },
-  ios: {
-    extension: ".wav",
-    audioQuality: Audio.RECORDING_OPTION_IOS_AUDIO_QUALITY_HIGH,
-    sampleRate: 44100,
-    numberOfChannels: 1,
-    bitRate: 128000,
-    linearPCMBitDepth: 16,
-    linearPCMIsBigEndian: false,
-    linearPCMIsFloat: false,
-  },
-};
+import axios from "axios";
 
 const Assistant = () => {
   const [userProfile, setUserProfile] = useState(null);
-  const [isRecording, setIsRecording] = useState(null);
+  const [isRecording, setIsRecording] = useState(false);
   const [recording, setRecording] = useState(null);
-  const [audioUri, setAudioUri] = useState(null);
-  const [recognizedText, setRecognizedText] = useState("");
+  const [transcription, setTranscription] = useState("");
 
   const getProfile = async () => {
     const accessToken = await AsyncStorage.getItem("token");
@@ -58,56 +34,45 @@ const Assistant = () => {
     }
   };
 
+  useEffect(() => {
+    getProfile();
+  }, []);
+
   const startRecording = async () => {
-    const { status } = await Permissions.askAsync(Permissions.AUDIO_RECORDING);
-    if (status !== "granted") return;
+    const status = await Audio.requestPermissionsAsync();
+    // console.log(status);
+    if(status != "granted") return;
 
     setIsRecording(true);
-    await Audio.setAudioModeAsync({
-      allowsRecordingIOS: true,
-      interruptionModeIOS: Audio.INTERRUPTION_MODE_IOS_DO_NOT_MIX,
-      playsInSilentModeIOS: true,
-      shouldDuckAndroid: true,
-      interruptionModeAndroid: Audio.INTERRUPTION_MODE_ANDROID_DO_NOT_MIX,
-      playThroughEarpieceAndroid: true,
-    });
-
-    const recording = new Audio.Recording();
+    const recording =   new Audio.Recording();
     try {
-      await recording.prepareToRecordAsync(recordingOptions);
+      await recording.prepareToRecordAsync(Audio.RECORDING_OPTIONS_PRESET_HIGH_QUALITY);
       await recording.startAsync();
     } catch (error) {
       console.log(error);
-      stopRecording();
     }
     setRecording(recording);
-    recording.setOnRecordingStatusUpdate((status) => {
-      if (!status.isRecording) {
-        setAudioUri(status.uri);
-      }
-    });
   };
 
   const stopRecording = async () => {
-    if (!recording) return;
-
+    if(!recording) return;
     try {
       await recording.stopAndUnloadAsync();
     } catch (error) {
       console.log(error);
     }
-
     setIsRecording(false);
     setRecording(null);
-    if (audioUri) {
-      const transcription = await getTranscription(audioUri);
-      setRecognizedText(transcription);
-    }
-  };
 
-  useEffect(() => {
-    getProfile();
-  }, []);
+    const formData = new FormData();
+    formData.append("audioUri", recording.getURI());
+
+    try {
+      const response =  await axios.post("http://localhost:3000/transcribe")
+    } catch (error) {
+      console.log(error);
+    }
+  }
 
   return (
     <LinearGradient colors={["#040306", "#131624"]} style={{ flex: 1 }}>
@@ -140,16 +105,12 @@ const Assistant = () => {
           <Text style={{ color: "white", fontSize: 16 }}>Start Recording</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity
-          style={styles.voiceButton}
-          onPress={stopRecording}
-          disabled={!isRecording}
-        >
+        <TouchableOpacity style={styles.voiceButton} onPress={stopRecording}>
           <Text style={{ color: "white", fontSize: 16 }}>Stop Recording</Text>
         </TouchableOpacity>
 
         <View style={styles.recognizedTextContainer}>
-          <Text style={styles.recognizedText}>{recognizedText}</Text>
+          <Text style={styles.recognizedText}></Text>
         </View>
       </ScrollView>
     </LinearGradient>

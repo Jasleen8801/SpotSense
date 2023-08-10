@@ -50,7 +50,7 @@ npm install
 
     - Create a Google Cloud Project and enable the Speech-to-Text API
     - Generate API credentials and download the JSON key file
-    - Save the JSON key file as `google-cloud-credentials.json` in the root directory of the project
+    - Save the JSON key file as `google-cloud-credentials.json` in the speech-api directory of the project
 
 
 ## Running the App
