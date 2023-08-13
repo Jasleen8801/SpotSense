@@ -13,6 +13,7 @@ Before you begin, make sure you have the following installed:
 - Node.js (https://nodejs.org/)
 - npm (Node Package Manager, comes with Node.js)
 - Expo CLI (https://docs.expo.dev/get-started/installation/)
+- ngrok (for exposing your local server to the internet)
 
 ### Setting Up the Project
 
@@ -39,19 +40,25 @@ Before you begin, make sure you have the following installed:
 
 4. Set up environment variables
 
-    - Create a file named `.env` in the root directory of the project
+    - Create a file named `.env` in the root directory of the project and add the following environment variables to the `.env` file:
+        ```bash
+        SPOTIFY_CLIENT_ID=<your-client-id>
+        SPOTIFY_REDIRECT_URI=<your-redirect-uri>
+        SPOTIFY_CLIENT_SECRET=<your-client-secret>
+        NGROK_URL=<your-ngrok-url>
+        ```
 
-    - Add the following environment variables to the `.env` file:
-        - `SPOTIFY_CLIENT_ID=<your-client-id>`
-        - `SPOTIFY_REDIRECT_URI=<your-redirect-uri>`
-        - `SPOTIFY_CLIENT_SECRET=<your-client-secret>`
-        - `NGROK_URL=<your-ngrok-url`
+    - Also create a `.env` file inside the `speech-api` directory and add the following environment variables to the `.env` file
+        ```bash
+        PROJECT_ID=<your-project-id>
+        BUCKET_NAME=<your-bucket-name>
+        ```
 
 5. Set up Google Cloud Speech API
 
     - Create a Google Cloud Project and enable the Speech-to-Text API
     - Generate API credentials and download the JSON key file
-    - Save the JSON key file as `google-cloud-credentials.json` in the speech-api directory of the project
+    - Save the JSON key file as `google-cloud-credentials.json` in the `speech-api` directory of the project
 
 6. To run the google speech-api, use `ngrok` using the following command, and copy the url to the .env file in root directory.
 

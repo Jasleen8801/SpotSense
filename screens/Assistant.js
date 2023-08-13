@@ -65,23 +65,24 @@ const Assistant = () => {
     setIsRecording(false);
     setRecording(null);
 
-    // const formData = new FormData();
-    // formData.append("audioUri", {
-    //   audioUri: recording.getURI(),
-    //   name: "audio.3gp",
-    //   type: "audio/3gp",
-    // });
+    const uri = await recording.getURI();
+    let uriParts = uri.split(".");
+    let fileType = uriParts[uriParts.length - 1];
+    const formData = new FormData();
+    formData.append("file", {
+      uri,
+      name: `recording.${fileType}`,
+      type: `audio/x-${fileType}`,
+    });
     // console.log(formData);
 
-    const audioUri = recording.getURI();
-    // const httpAudioUri = `http://${audioUri.replace("file://", "")}`;
-    const dataToSend = { key: audioUri };
-
     try {
-      console.log(`${NGROK_URL}/transcribe`);
-      const response = await axios.post(`${NGROK_URL}/transcribe`, dataToSend, {
+      // console.log(`${NGROK_URL}/transcribe`);
+      const response = await fetch(`${NGROK_URL}/transcribe`, {
+        method: "POST",
+        body: formData,
         headers: {
-          "Content-Type": "application/json",
+          "Content-Type": "multipart/form-data",
         },
       });
       // setTranscription(response.data.transcription);
