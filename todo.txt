@@ -17,3 +17,7 @@ chatbot api after conversational systems main course work
 
 bs voice assistant main reh gya - https://fostermade.co/blog/making-speech-to-text-work-with-react-native-and-expo 
 ispe dekh lena chl jayega lol ... jk no 
+
+// readme krlena
+// speech api ka dekhna hai ... bc uri http hona chahiye pr react native pe nhi hota
+// also formData dekhna 

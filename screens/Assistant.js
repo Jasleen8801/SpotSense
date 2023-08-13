@@ -9,9 +9,9 @@ import {
 import React, { useState, useEffect } from "react";
 import { LinearGradient } from "expo-linear-gradient";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import * as Permissions from "expo-permissions";
 import { Audio } from "expo-av";
 import axios from "axios";
+import { NGROK_URL } from "@env";
 
 const Assistant = () => {
   const [userProfile, setUserProfile] = useState(null);
@@ -40,13 +40,14 @@ const Assistant = () => {
 
   const startRecording = async () => {
     const status = await Audio.requestPermissionsAsync();
-    // console.log(status);
-    if(status != "granted") return;
+    if (status.status != "granted") return;
 
     setIsRecording(true);
-    const recording =   new Audio.Recording();
+    const recording = new Audio.Recording();
     try {
-      await recording.prepareToRecordAsync(Audio.RECORDING_OPTIONS_PRESET_HIGH_QUALITY);
+      await recording.prepareToRecordAsync(
+        Audio.RECORDING_OPTIONS_PRESET_HIGH_QUALITY
+      );
       await recording.startAsync();
     } catch (error) {
       console.log(error);
@@ -55,7 +56,7 @@ const Assistant = () => {
   };
 
   const stopRecording = async () => {
-    if(!recording) return;
+    if (!recording) return;
     try {
       await recording.stopAndUnloadAsync();
     } catch (error) {
@@ -64,15 +65,45 @@ const Assistant = () => {
     setIsRecording(false);
     setRecording(null);
 
-    const formData = new FormData();
-    formData.append("audioUri", recording.getURI());
+    // const formData = new FormData();
+    // formData.append("audioUri", {
+    //   audioUri: recording.getURI(),
+    //   name: "audio.3gp",
+    //   type: "audio/3gp",
+    // });
+    // console.log(formData);
+
+    const audioUri = recording.getURI();
+    // const httpAudioUri = `http://${audioUri.replace("file://", "")}`;
+    const dataToSend = { key: audioUri };
 
     try {
-      const response =  await axios.post("http://localhost:3000/transcribe")
+      console.log(`${NGROK_URL}/transcribe`);
+      const response = await axios.post(`${NGROK_URL}/transcribe`, dataToSend, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      // setTranscription(response.data.transcription);
+      console.log(response);
     } catch (error) {
       console.log(error);
     }
-  }
+
+    // const dataToSend = { key: "value" };
+
+    // try {
+    //   console.log(`${NGROK_URL}/test`);
+    //   const response = await axios.post(`${NGROK_URL}/test`, dataToSend, {
+    //     headers: {
+    //       "Content-Type": "application/json",
+    //     },
+    //   });
+    //   console.log(response.data);
+    // } catch (error) {
+    //   console.log(error);
+    // }
+  };
 
   return (
     <LinearGradient colors={["#040306", "#131624"]} style={{ flex: 1 }}>
@@ -110,7 +141,7 @@ const Assistant = () => {
         </TouchableOpacity>
 
         <View style={styles.recognizedTextContainer}>
-          <Text style={styles.recognizedText}></Text>
+          <Text style={styles.recognizedText}>{transcription}</Text>
         </View>
       </ScrollView>
     </LinearGradient>
