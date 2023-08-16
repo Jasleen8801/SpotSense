@@ -18,6 +18,8 @@ const Assistant = () => {
   const [isRecording, setIsRecording] = useState(false);
   const [recording, setRecording] = useState(null);
   const [transcription, setTranscription] = useState("");
+  const [currentDeviceId, setCurrentDeviceId] = useState("");
+  const [isShuffleOn, setIsShuffleOn] = useState(false);
 
   const getProfile = async () => {
     const accessToken = await AsyncStorage.getItem("token");
@@ -35,7 +37,9 @@ const Assistant = () => {
   };
 
   useEffect(() => {
+    // console.log(NGROK_URL);
     getProfile();
+    getCurrentDeviceID();
   }, []);
 
   const startRecording = async () => {
@@ -74,10 +78,9 @@ const Assistant = () => {
       name: `recording.${fileType}`,
       type: `audio/x-${fileType}`,
     });
-    // console.log(formData);
 
     try {
-      // console.log(`${NGROK_URL}/transcribe`);
+      console.log(`${NGROK_URL}/transcribe`);
       const response = await fetch(`${NGROK_URL}/transcribe`, {
         method: "POST",
         body: formData,
@@ -85,25 +88,186 @@ const Assistant = () => {
           "Content-Type": "multipart/form-data",
         },
       });
-      // setTranscription(response.data.transcription);
-      console.log(response);
+      const json = await response.json();
+      setTranscription(json.data);
+    } catch (error) {
+      console.log(JSON.stringify(error, null, 2));
+    }
+  };
+
+  // const testApi = async () => {
+  //   const dataToSend = { key: "value" };
+
+  //   try {
+  //     console.log(`${NGROK_URL}/test`);
+  //     const response = await axios.post(`${NGROK_URL}/test`, dataToSend, {
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //       },
+  //     });
+  //     console.log(response.data);
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+  // };
+
+  const getCurrentDeviceID = async () => {
+    // not really needed :(
+    const accessToken = await AsyncStorage.getItem("token");
+    try {
+      const response = await axios.get(
+        "https://api.spotify.com/v1/me/player?market=ES",
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
+      // console.log(response.data.device);
+      if (response.data.is_playing) {
+        setCurrentDeviceId(response.data.device.id);
+      }
     } catch (error) {
       console.log(error);
     }
+  };
 
-    // const dataToSend = { key: "value" };
+  const handleResumePlayback = async () => {
+    const accessToken = await AsyncStorage.getItem("token");
+    try {
+      const response = await axios.put(
+        "https://api.spotify.com/v1/me/player/play",
+        null,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
+      console.log(response.data);
+    } catch (error) {
+      if (error.response) {
+        console.log("Response Status:", error.response.status);
+        console.log("Response Data:", error.response.data);
+      } else {
+        console.log("Error:", error.message);
+      }
+    }
+  };
 
-    // try {
-    //   console.log(`${NGROK_URL}/test`);
-    //   const response = await axios.post(`${NGROK_URL}/test`, dataToSend, {
-    //     headers: {
-    //       "Content-Type": "application/json",
-    //     },
-    //   });
-    //   console.log(response.data);
-    // } catch (error) {
-    //   console.log(error);
-    // }
+  const handlePausePlayback = async () => {
+    const accessToken = await AsyncStorage.getItem("token");
+    // console.log(accessToken);
+    try {
+      const response = await axios.put(
+        "https://api.spotify.com/v1/me/player/pause",
+        null,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
+      // console.log(response.data);
+    } catch (error) {
+      if (error.response) {
+        console.log("Response Status:", error.response.status);
+        console.log("Response Data:", error.response.data);
+      } else {
+        console.log("Error:", error.message);
+      }
+    }
+  };
+
+  const handleNextTrack = async () => {
+    const accessToken = await AsyncStorage.getItem("token");
+    // console.log(accessToken);
+    try {
+      const response = await axios.post(
+        "https://api.spotify.com/v1/me/player/next",
+        null,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
+    } catch (error) {
+      if (error.response) {
+        console.log("Response Status:", error.response.status);
+        console.log("Response Data:", error.response.data);
+      } else {
+        console.log("Error:", error.message);
+      }
+    }
+  };
+
+  const handlePreviousTrack = async () => {
+    const accessToken = await AsyncStorage.getItem("token");
+    // console.log(accessToken);
+    try {
+      const response = await axios.post(
+        "https://api.spotify.com/v1/me/player/previous",
+        null,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
+    } catch (error) {
+      if (error.response) {
+        console.log("Response Status:", error.response.status);
+        console.log("Response Data:", error.response.data);
+      } else {
+        console.log("Error:", error.message);
+      }
+    }
+  };
+
+  const handleSetRepeat = async () => {
+    const accessToken = await AsyncStorage.getItem("token");
+    try {
+      const response = await axios.put(
+        "https://api.spotify.com/v1/me/player/repeat?state=context",
+        null,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
+    } catch (error) {
+      if (error.response) {
+        console.log("Response Status:", error.response.status);
+        console.log("Response Data:", error.response.data);
+      } else {
+        console.log("Error:", error.message);
+      }
+    }
+  };
+
+  const handleToggleShuffle = async () => {
+    const accessToken = await AsyncStorage.getItem("token");
+    try {
+      const response = await axios.put(
+        `https://api.spotify.com/v1/me/player/shuffle?state=${isShuffleOn}`,
+        null,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
+      setIsShuffleOn(!isShuffleOn);
+    } catch (error) {
+      if (error.response) {
+        console.log("Response Status:", error.response.status);
+        console.log("Response Data:", error.response.data);
+      } else {
+        console.log("Error:", error.message);
+      }
+    }
   };
 
   return (
@@ -133,12 +297,50 @@ const Assistant = () => {
           </View>
         </View>
 
-        <TouchableOpacity style={styles.voiceButton} onPress={startRecording}>
-          <Text style={{ color: "white", fontSize: 16 }}>Start Recording</Text>
+        <TouchableOpacity
+          style={styles.voiceButton}
+          onPressIn={startRecording}
+          onPressOut={stopRecording}
+        >
+          <Text style={{ color: "white", fontSize: 16 }}>Hold to Record</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.voiceButton} onPress={stopRecording}>
-          <Text style={{ color: "white", fontSize: 16 }}>Stop Recording</Text>
+        <TouchableOpacity
+          style={styles.voiceButton}
+          onPress={handleResumePlayback}
+        >
+          <Text style={{ color: "white", fontSize: 16 }}>Play</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.voiceButton}
+          onPress={handlePausePlayback}
+        >
+          <Text style={{ color: "white", fontSize: 16 }}>Pause</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.voiceButton} onPress={handleNextTrack}>
+          <Text style={{ color: "white", fontSize: 16 }}>Next Track</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.voiceButton}
+          onPress={handlePreviousTrack}
+        >
+          <Text style={{ color: "white", fontSize: 16 }}>Previous Track</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.voiceButton} onPress={handleSetRepeat}>
+          <Text style={{ color: "white", fontSize: 16 }}>Repeat Mode</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          onPress={handleToggleShuffle}
+          style={styles.voiceButton}
+        >
+          <Text style={{ color: "white", fontSize: 16 }}>
+            Toggle Playback Shuffle: {isShuffleOn ? "On" : "Off"}
+          </Text>
         </TouchableOpacity>
 
         <View style={styles.recognizedTextContainer}>

@@ -57,7 +57,8 @@ const LoginScreen = () => {
         "playlist-read-collaborative",
         "playlist-modify-public",
         "user-read-currently-playing",
-        "user-modify-playback-state"
+        "user-modify-playback-state",
+        "user-read-playback-state"
         // "playlist-modify-private",
       ],
       usePKCE: false,
