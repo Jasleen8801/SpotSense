@@ -34,7 +34,7 @@ app.get("/", (req, res) => {
   res.send("It Works!!");
 });
 
-app.post("/test", (req, res) => {
+app.post("/test", async (req, res) => {
   try {
     console.log("Received a test POST request");
     const receivedData = req.body; // Get the data sent in the POST request
@@ -64,8 +64,9 @@ app.post("/transcribe", async (req, res) => {
     };
 
     await storage.bucket(BUCKET_NAME).upload(tempFilePath, uploadOptions);
-    const gcsUri = `gs://${BUCKET_NAME}/${remoteFilePath}`;
-    console.log(gcsUri);
+    // const gcsUri = `gs://${BUCKET_ NAME}/${remoteFilePath}`;
+    // console.log(gcsUri);
+    const gcsUri = "gs://cloud-samples-data/speech/brooklyn_bridge.raw";
 
     const audio = {
       uri: gcsUri,
@@ -78,16 +79,21 @@ app.post("/transcribe", async (req, res) => {
     };
 
     const [response] = await client.recognize({ audio: audio, config: config });
-    console.log(response);
 
     const transcription = response.results
       .map((result) => result.alternatives[0].transcript)
       .join("\n");
 
-    res.json({ transcription });
-    await fs.promises.unlink(tempFilePath);
+    console.log(typeof transcription);
+    console.log(transcription);
+
+    res.json({
+      message: "Transcription sent",
+      data: transcription,
+    });
+    // await fs.promises.unlink(tempFilePath);
   } catch (error) {
-    console.log(error);
+    // console.log(error);
     res.status(500).json({ error: "An error occurred" });
   }
 });
