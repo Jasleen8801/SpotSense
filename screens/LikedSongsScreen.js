@@ -18,14 +18,16 @@ import { BottomModal, ModalContent } from "react-native-modals";
 import { Audio } from "expo-av";
 import { debounce } from "lodash";
 
-import { Ionicons } from "@expo/vector-icons";
-import { AntDesign } from "@expo/vector-icons";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { Entypo } from "@expo/vector-icons";
+import {
+  Ionicons,
+  AntDesign,
+  MaterialCommunityIcons,
+  Entypo,
+  MaterialIcons,
+  FontAwesome,
+  Feather,
+} from "@expo/vector-icons";
 import SongItem from "../components/SongItem";
-import { MaterialIcons } from "@expo/vector-icons";
-import { FontAwesome } from "@expo/vector-icons";
-import { Feather } from "@expo/vector-icons";
 
 const LikedSongsScreen = () => {
   const navigation = useNavigation();

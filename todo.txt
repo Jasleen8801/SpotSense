@@ -25,3 +25,7 @@ ispe dekh lena chl jayega lol ... jk no
 // https://stackoverflow.com/questions/54510060/expo-react-native-there-was-a-problem-sending-log-messages - ho gya
 // dekhna hai response transcript ka waapis kyu nhi jaa rha - ho gya
 // aur dekhna ki yeh response mein result kyu ni generate ho rha... empty array nhi chahiye thi - nhi hora bc
+
+// ab krna hai chatbot 
+// isme lgegi ml (jo nhi aati)
+// aur dekhna hai apna pyaara google speech to text api response kyu ni bna rha
