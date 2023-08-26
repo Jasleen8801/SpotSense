@@ -5,13 +5,14 @@ import {
   View,
   Image,
   TouchableOpacity,
+  Animated,
 } from "react-native";
 import React, { useState, useEffect } from "react";
 import { LinearGradient } from "expo-linear-gradient";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Audio } from "expo-av";
 import axios from "axios";
-import { NGROK_URL } from "@env";
+import { NGROK_URL, WIT_AI_SERVER_TOKEN } from "@env";
 
 const Assistant = () => {
   const [userProfile, setUserProfile] = useState(null);
@@ -37,10 +38,29 @@ const Assistant = () => {
   };
 
   useEffect(() => {
-    // console.log(NGROK_URL);
     getProfile();
     getCurrentDeviceID();
+    console.log(NGROK_URL);
   }, []);
+
+  const recognizeIntentWithWit = async () => {
+    try {
+      const response = await axios.get(`https://api.wit.ai/message?v=20210920&q=${encodeURIComponent(transcription)}`,{
+        headers: {
+          Authorization: `Bearer ${WIT_AI_SERVER_TOKEN}}`
+        }
+      });
+      const recognizedIntent = response.data.intents[0]?.name || null;
+      console.log(recognizedIntent);
+      if(recognizedIntent) {
+        preformOperationBasedOnIntent(recognizedIntent);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  
 
   const startRecording = async () => {
     const status = await Audio.requestPermissionsAsync();

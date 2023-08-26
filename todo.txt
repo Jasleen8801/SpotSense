@@ -29,3 +29,8 @@ ispe dekh lena chl jayega lol ... jk no
 // ab krna hai chatbot 
 // isme lgegi ml (jo nhi aati)
 // aur dekhna hai apna pyaara google speech to text api response kyu ni bna rha
+
+Wit.ai ke model ko train krna hai 
+Toh ab wit.ai se recognised text to commands ke saath map krna hai
+Aur aawaaz ka thoda sa dekhna hai 
+Aur chatbot ka bhi dekhna hai
